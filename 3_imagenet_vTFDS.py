@@ -75,38 +75,7 @@ def build_cnn(input_shape, num_classes):
                   metrics=['accuracy'])
     return model
 
-def build_resnet_like(input_shape, num_classes):
-    """
-    A simplified ResNet-like architecture (referred to as R-CNN in request context).
-    """
-    inputs = layers.Input(shape=input_shape)
-    x = layers.Conv2D(64, (3, 3), padding='same', activation='relu')(inputs)
-    x = layers.MaxPooling2D((2, 2))(x)
-    
-    # Residual Block 1
-    res = x
-    x = layers.Conv2D(64, (3, 3), padding='same', activation='relu')(x)
-    x = layers.Conv2D(64, (3, 3), padding='same')(x)
-    x = layers.add([x, res])
-    x = layers.Activation('relu')(x)
-    
-    x = layers.MaxPooling2D((2, 2))(x)
-    
-    # Residual Block 2
-    res = x
-    x = layers.Conv2D(64, (3, 3), padding='same', activation='relu')(x)
-    x = layers.Conv2D(64, (3, 3), padding='same')(x)
-    x = layers.add([x, res])
-    x = layers.Activation('relu')(x)
-    
-    x = layers.GlobalAveragePooling2D()(x)
-    outputs = layers.Dense(num_classes, activation='softmax')(x)
-    
-    model = models.Model(inputs=inputs, outputs=outputs, name="ResNet_Like_Model")
-    model.compile(optimizer='adam',
-                  loss='sparse_categorical_crossentropy',
-                  metrics=['accuracy'])
-    return model
+
 
 def main():
     # a. Load the dataset
@@ -179,24 +148,9 @@ def main():
     print(f"CNN Testing Accuracy: {cnn_acc*100:.2f}%")
     print(f"CNN Training Accuracy (Final Epoch): {history_cnn.history['accuracy'][-1]*100:.2f}%")
     
-    # i. Build an R-CNN (ResNet-like for classification)
-    print("\nStep i: Building ResNet-like Model (referred to as R-CNN)...")
-    resnet_model = build_resnet_like((IMG_SIZE, IMG_SIZE, 3), num_classes)
-    resnet_model.summary()
+
     
-    print("Training ResNet-like Model...")
-    history_resnet = resnet_model.fit(X_train_aug, y_train_aug, epochs=5, batch_size=64, validation_data=(X_test, y_test))
-    
-    # j. Show the training and testing accuracy
-    print("\nStep j: ResNet Results")
-    resnet_loss, resnet_acc = resnet_model.evaluate(X_test, y_test, verbose=0)
-    print(f"ResNet Testing Accuracy: {resnet_acc*100:.2f}%")
-    print(f"ResNet Training Accuracy (Final Epoch): {history_resnet.history['accuracy'][-1]*100:.2f}%")
-    
-    # Compare
-    print("\nComparison:")
-    print(f"CNN Accuracy: {cnn_acc*100:.2f}%")
-    print(f"ResNet Accuracy: {resnet_acc*100:.2f}%")
+
 
 if __name__ == "__main__":
     main()
